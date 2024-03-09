@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #define NUM_THREADS 5
 
@@ -33,64 +34,60 @@ void *thread_funct(void *arg){
 	pthread_exit NULL;
 }
 
-void InicializeRooms(ROOM  **room){
-	if(room != NULL){
-		printf("FUNCTION InicializeRooms: structure is not empty.\n");
+void InicializeRoomsAtNULL(ROOM  **room){
+	if(*room == NULL){
+		printf("FUNCTION InicializeRooms: structure is empty.\n");
 		
-		
+		(*room)->ID_room 	= NULL;
+		(*room)->countClients	= NULL;
+		(*room)->s_nameRoom 	= NULL;
+		(*room)->clients	= NULL;
 	} 
 	else
-		printf("(%d)ERROR: accepted strusture is empty\n",__LINE__);
+		printf("(%d)ERROR: accepted structure is not empty\n",__LINE__);
 }
 
-void _InicializeRooms(ROOM *rooms){
-	if((rooms = (ROOM*)malloc(1 * sizeof(ROOM))) != NULL){
-		if((rooms->ID_room = (int*)malloc(sizeof(int))) != NULL){
-			if((rooms->countClients = (int*)malloc(sizeof(int))) != NULL){
-				if((rooms->s_nameRoom = (char*)malloc(1 * sizeof(char))) != NULL){
-					if((rooms->clients = (CLIENT*)malloc(1 * sizeof(CLIENT))) != NULL){
-						if((rooms->clients->ID_client = (int*)malloc(sizeof(int))) != NULL){
-							if((rooms->clients->s_nameClient = (char*)malloc(1 * sizeof(char))) != NULL){
-								
-								printf("(%d)SUCCESSFUL; successfully alocated memory.",__LINE__);
-								
-							}
-							else{
-								printf("(%d)ERROR: error allocating memory. (rooms.clients.s_nameClient)", __LINE__);
-							}
-						}
-						else{
-							printf("(%d)ERROR: error allocating memory. (rooms.clients.ID_client)", __LINE__);
-						}
+int SetRoomValues(ROOM **room, int *ID_room, char *s_roomName){
+	if((*room)->ID_room == NULL){
+
+		if(((*room)->ID_room = (int*)malloc(sizeof(int))) != NULL){
+			*((*room)->ID_room) = *ID_room;
+			
+			if(((*room)->countClients = (int*)malloc(sizeof(int))) != NULL){
+				(*room)->countClients = 0;
+				
+				// zisti ako je to s '\0' v prijatom retazci. ci treba mat strlen + 1 alebo sa prepise aj ukoncovaci znak
+				if(((*room)->s_nameRoom = (char*)malloc((strlen(&s_roomName) + 1) * sizeof(char))) != NULL){
+					if((strcpy((*room)->s_roomName, *s_roomName)) != NULL){
+						
+						// tu sa zavola funkcia pre inicializaciu prveho klienta?
+						return 1;
+						
+					} else{
+						printf("(%d)ERROR: error while copying string. (room->s_roomName)",__LINE__);
 					}
-					else{
-						printf("(%d)ERROR: error allocating memory. (rooms.clients)",__LINE__);
-						exit(1);
-					}
+				} else{
+					printf("(%d)ERROR: error allocating memory. (room->s_roomName",__LINE__);
 				}
-				else{
-					printf("(%d)ERROR: error allocating memory. (rooms.s_name)",__LINE__);
-					exit(1);
-				}
+			} else{
+				printf("(%d)ERROR: error allocating memory. (room->countClients)",__LINE__);
 			}
-			else{
-				printf("(%d)ERROR: error allocating memory. (rooms.countClients)",__LINE__);
-				exit(1);
-			}
-		}
-		else{
-			printf("(%d)ERROR: error allocating memory. (rooms.ID_room)", __LINE__);
-			exit(1);
+		} else{
+			printf("(%d)ERROR: error allocating memory. (room->ID_room)", __LINE__);
 		}
 	}
-	else{
-		printf("(%d)ERROR: error allocating memory. (*rooms)", __LINE__);
-		exit(1);
-	}
+	return 0;
 }
 
-void FreeRooms(){
+void FreeRoom(ROOM **room){
+	memset(*(*room)->s_roomName, '\0', sizeof((*room)->s_roomName));
+	free((*room)->s_roomName);
 	
+	(*room)->countClients = 0;
+	free((*room)->countClients);
+	
+	(*room)->ID_room = 0;
+	free((*room)->ID_room);
 }
 
 int main(void){
@@ -124,10 +121,16 @@ int main(void){
 	
 	if(rooms == NULL){
 		printf("rooms is NULL\n");
-		InicializeRooms(&rooms);
-	}
-	else
+		InicializeRoomsAtNULL(&rooms);
+		
+		int id = 3;
+		int count = 0;
+		char buffer[] = "hranolky";
+		SetRoomValues(&rooms, &id, &count, &buffer);
+	} else{
 		printf("rooms is not NULL\n");
+	}
 	
+	FreeRoom(&rooms);
 	return 0;
 }
