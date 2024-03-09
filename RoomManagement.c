@@ -39,7 +39,8 @@ void InicializeRoomsAtNULL(ROOM  **room){
 		printf("FUNCTION InicializeRooms: structure is empty.\n");
 		
 		// change malloc at realloc
-		if((*room = (ROOM*)malloc(sizeof(ROOM))) != NULL){
+		//if((*room = (ROOM*)malloc(sizeof(ROOM))) != NULL){
+		if((*room = (ROOM*)realloc(*room, sizeof(ROOM))) != NULL){
 			// segmentation fault!!!	
 			(*room)->ID_room 	= NULL;
 			(*room)->countClients	= NULL;
@@ -56,21 +57,26 @@ void InicializeRoomsAtNULL(ROOM  **room){
 int SetRoomValues(ROOM **room, int *ID_room, char *s_nameRoom){
 	if((*room)->ID_room == NULL){
 		printf("(%d)SUCCESSFUL: room is NULL. (SetRoomValue)\n", __LINE__);
-
+		printf("Address: %p\n", (void*)(*room));
+		
 		if(((*room)->ID_room = (int*)malloc(sizeof(int))) != NULL){
 			*((*room)->ID_room) = *ID_room;
+			printf("Malloc for ID_room.\t\tAddress:\t%p\n", (void *)(*room)->ID_room);
 			
 			if(((*room)->countClients = (int*)malloc(sizeof(int))) != NULL){
 				(*room)->countClients = 0;
+				printf("Malloc for countClients.\tAddress:\t%p\n", (void*)(*room)->countClients);
 				
 				// zisti ako je to s '\0' v prijatom retazci. ci treba mat strlen + 1 alebo sa prepise aj ukoncovaci znak
 				if(((*room)->s_nameRoom = (char*)malloc((strlen(s_nameRoom) + 1) * sizeof(char))) != NULL){
 					if((strcpy((*room)->s_nameRoom, s_nameRoom)) != NULL){
-						
+						printf("Malloc for s_nameRoom.\t\tAddress:\t%p\n", (void*)(*room)->s_nameRoom);						
+
 						// tu sa zavola funkcia pre inicializaciu prveho klienta?
 						//free(ID_room);
 						//free(s_nameRoom);
 						
+						printf("Pararams:\n\tAddress:\t%p\n\tAddress:\t%p\n\tAddress:\t%p\n", (void*)(*room), (void*)ID_room, (void*)s_nameRoom);
 						return 1;
 						
 					} else{
@@ -108,7 +114,7 @@ void FreeRoom(ROOM **room){
 	(*room)->ID_room = NULL;	
 
 	free((*room)->clients);
-	//(*room)->clients = NULL;
+	(*room)->clients = NULL;
 
 	free(*room);
 	*room = NULL;
@@ -120,7 +126,7 @@ int main(void){
 	
 	ROOM *rooms = NULL;
 	
-	for(t = 0; t < NUM_THREADS; t++){
+	/*for(t = 0; t < NUM_THREADS; t++){
 		rc = pthread_create(&threads[t], NULL, thread_funct, (void*)(intptr_t)t);
 		if(rc){
 			printf("ERROR: %d\n", rc);
@@ -157,8 +163,17 @@ int main(void){
 		printf("rooms is not NULL\n");
 		return 1;
 	}
-	
-	FreeRoom(&rooms);
+	*/
+	InicializeRoomsAtNULL(&rooms);
+
+	int id = 3;
+	char buffer[] = "hello";
+
+	if((SetRoomValues(&rooms, &id, buffer)) == 1){
+		printf("(%d)SUCCESSFUL: Set room values was successfully.\n",__LINE__);
+		FreeRoom(&rooms);
+	}
+	//FreeRoom(&rooms);
 	//free(rooms);
 
 	printf("Bey");
