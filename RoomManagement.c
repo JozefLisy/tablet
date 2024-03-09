@@ -95,18 +95,21 @@ int SetRoomValues(ROOM **room, int *ID_room, char *s_nameRoom){
 }
 
 void FreeRoom(ROOM **room){
-	memset((*room)->s_nameRoom, '\0', sizeof((*room)->s_nameRoom));
-	free((*room)->s_nameRoom);
+	memset((*room)->s_nameRoom, '\0', strlen((*room)->s_nameRoom) + 1); //treba + 1?
+	free((*room)->s_nameRoom); 
+	(*room)->s_nameRoom = NULL;
 	
 	(*room)->countClients = 0;
 	free((*room)->countClients);
+	(*room)->countClients = NULL;
 	
 	(*room)->ID_room = 0;
 	free((*room)->ID_room);
-	
+	(*room)->ID_room = NULL;	
+
 	free((*room)->clients);
 	
-	free(*room);
+	//free(*room);
 }
 
 int main(void){
@@ -154,6 +157,8 @@ int main(void){
 	}
 	
 	FreeRoom(&rooms);
+	free(rooms);
+
 	printf("Bey");
 	return 0;
 }
