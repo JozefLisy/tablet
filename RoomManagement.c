@@ -75,11 +75,11 @@ void FreeRoom(ROOM **room){
 	free((*room)->s_nameRoom); 
 	(*room)->s_nameRoom = NULL;
 	
-	//(*room)->countClients = 0;
+	*(*room)->countClients = 0;
 	free((*room)->countClients);
 	(*room)->countClients = NULL;
 	
-	//(*room)->ID_room = 0;
+	*(*room)->ID_room = 0;
 	free((*room)->ID_room);
 	(*room)->ID_room = NULL;	
 
