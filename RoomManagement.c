@@ -38,17 +38,24 @@ void InicializeRoomsAtNULL(ROOM  **room){
 	if(*room == NULL){
 		printf("FUNCTION InicializeRooms: structure is empty.\n");
 		
-		(*room)->ID_room 	= NULL;
-		(*room)->countClients	= NULL;
-		(*room)->s_nameRoom 	= NULL;
-		(*room)->clients	= NULL;
-	} 
-	else
+		// change malloc at realloc
+		if((*room = (ROOM*)malloc(sizeof(ROOM))) != NULL){
+			// segmentation fault!!!	
+			(*room)->ID_room 	= NULL;
+			(*room)->countClients	= NULL;
+			(*room)->s_nameRoom 	= NULL;
+			(*room)->clients	= NULL;
+			printf("(%d)SUCCESFUL: inicialize was successfully.\n",__LINE__);
+		} else{
+			printf("(%d)ERROR: error allocating memory. (*room)\n",__LINE__);
+		}
+	} else
 		printf("(%d)ERROR: accepted structure is not empty\n",__LINE__);
 }
 
-int SetRoomValues(ROOM **room, int *ID_room, char *s_roomName){
+int SetRoomValues(ROOM **room, int *ID_room, char *s_nameRoom){
 	if((*room)->ID_room == NULL){
+		printf("(%d)SUCCESSFUL: room is NULL. (SetRoomValue)\n", __LINE__);
 
 		if(((*room)->ID_room = (int*)malloc(sizeof(int))) != NULL){
 			*((*room)->ID_room) = *ID_room;
@@ -57,10 +64,13 @@ int SetRoomValues(ROOM **room, int *ID_room, char *s_roomName){
 				(*room)->countClients = 0;
 				
 				// zisti ako je to s '\0' v prijatom retazci. ci treba mat strlen + 1 alebo sa prepise aj ukoncovaci znak
-				if(((*room)->s_nameRoom = (char*)malloc((strlen(&s_roomName) + 1) * sizeof(char))) != NULL){
-					if((strcpy((*room)->s_roomName, *s_roomName)) != NULL){
+				if(((*room)->s_nameRoom = (char*)malloc((strlen(s_nameRoom) + 1) * sizeof(char))) != NULL){
+					if((strcpy((*room)->s_nameRoom, s_nameRoom)) != NULL){
 						
 						// tu sa zavola funkcia pre inicializaciu prveho klienta?
+						//free(ID_room);
+						//free(s_nameRoom);
+						
 						return 1;
 						
 					} else{
@@ -75,19 +85,28 @@ int SetRoomValues(ROOM **room, int *ID_room, char *s_roomName){
 		} else{
 			printf("(%d)ERROR: error allocating memory. (room->ID_room)", __LINE__);
 		}
+	} else{
+		printf("(%d)ERROR: room is not null. (SetRoomValues)\n",__LINE__);
 	}
+	
+	//free(ID_room);
+	//free(s_nameRoom);
 	return 0;
 }
 
 void FreeRoom(ROOM **room){
-	memset(*(*room)->s_roomName, '\0', sizeof((*room)->s_roomName));
-	free((*room)->s_roomName);
+	memset((*room)->s_nameRoom, '\0', sizeof((*room)->s_nameRoom));
+	free((*room)->s_nameRoom);
 	
 	(*room)->countClients = 0;
 	free((*room)->countClients);
 	
 	(*room)->ID_room = 0;
 	free((*room)->ID_room);
+	
+	free((*room)->clients);
+	
+	free(*room);
 }
 
 int main(void){
@@ -126,11 +145,15 @@ int main(void){
 		int id = 3;
 		int count = 0;
 		char buffer[] = "hranolky";
-		SetRoomValues(&rooms, &id, &count, &buffer);
+		if((SetRoomValues(&rooms, &id, buffer)) == 1){
+			printf("(%d)SUCCESSFUL: Set room values was successfully.\n",__LINE__);
+		}
 	} else{
 		printf("rooms is not NULL\n");
+		return 1;
 	}
 	
 	FreeRoom(&rooms);
+	printf("Bey");
 	return 0;
 }
